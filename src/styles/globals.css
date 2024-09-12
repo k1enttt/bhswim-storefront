@@ -110,3 +110,47 @@
     @apply text-[32px] leading-[44px] font-semibold;
   }
 }
+
+html body {
+  font-family: "PT Sans Narrow", sans-serif;
+}
+
+.mySwiper {
+  /*
+  --swiper-pagination-color: var(--swiper-theme-color);
+  --swiper-pagination-left: auto;
+  --swiper-pagination-right: 8px;
+  --swiper-pagination-bottom: 8px;
+  --swiper-pagination-top: auto;
+  --swiper-pagination-fraction-color: inherit;
+  --swiper-pagination-progressbar-bg-color: rgba(0,0,0,0.25);
+  --swiper-pagination-progressbar-size: 4px;
+  --swiper-pagination-bullet-size: 8px;
+  --swiper-pagination-bullet-width: 8px;
+  --swiper-pagination-bullet-height: 8px;
+  --swiper-pagination-bullet-border-radius: 50%;
+  --swiper-pagination-bullet-inactive-color: #000;
+  --swiper-pagination-bullet-inactive-opacity: 0.2;
+  --swiper-pagination-bullet-opacity: 1;
+  --swiper-pagination-bullet-horizontal-gap: 4px;
+  --swiper-pagination-bullet-vertical-gap: 6px;
+  */
+  --swiper-pagination-color: black;
+  @apply p-2 border rounded-lg
+}
+
+.divider-line {
+  @apply border-b border-gray-200;
+}
+
+.heading-2 {
+  @apply text-xl font-semibold;
+}
+
+.heading-3 {
+  @apply text-base font-semibold text-black;
+}
+
+.normal-text {
+  @apply text-base font-normal text-gray-500;
+}
