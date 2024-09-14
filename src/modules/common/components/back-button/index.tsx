@@ -12,7 +12,7 @@ const BackButton = ({ size, className }: { size?: string, className?: string }) 
     <button
       className={clx(
         `bg-gray-200 flex items-center justify-center px-1 rounded-lg`,
-        size ? `w-[${size}] h-[${size}]` : "w-8 h-8",
+        size ? `w-[${size}] h-[${size}]` : "w-10 h-10",
         className
       )}
       onClick={() => router.back()}

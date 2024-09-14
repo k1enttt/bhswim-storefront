@@ -2,23 +2,13 @@ import { PricedProduct } from "@medusajs/medusa/dist/types/pricing"
 import Slider from "@modules/common/components/slider"
 import StarRating from "@modules/common/components/star-rating"
 import { Region } from "@medusajs/medusa"
-import AddToWishlist from "@modules/products/components/add-to-wishlist"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  faCheck,
-  faChevronDown,
-  faTruck,
-} from "@fortawesome/free-solid-svg-icons"
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react"
-import { create } from "lodash"
-import { title } from "process"
 import Review from "@modules/products/components/review"
 import ViewAllButton from "@modules/products/components/view-all-button"
 import WriteReviewButton from "@modules/products/components/write-review-button"
+import { notFound } from "next/navigation"
+import { Suspense } from "react"
+import MyProductActions from "@modules/products/components/product-actions/my-index"
+import MyProductActionsWrapper from "../product-actions-wrapper/my-index"
 
 type ProductTemplateProps = {
   product: PricedProduct
@@ -27,8 +17,9 @@ type ProductTemplateProps = {
 }
 
 const ProductDetail: React.FC<ProductTemplateProps> = ({ product, region }) => {
-  // Tìm varient được chọn
-  // Sau đó lấy giá của varient đó
+  if (!product || !product.id) {
+    return notFound()
+  }
 
   return (
     <div className="space-y-4">
@@ -36,29 +27,21 @@ const ProductDetail: React.FC<ProductTemplateProps> = ({ product, region }) => {
       <div className="space-y-4">
         <div>
           <div className="flex items-start justify-between">
-            <h1 className="text-xl flex-1 basis-0">{product.title}</h1>
-            <AddToWishlist className="" />
+            <h1 className="text-2xl flex-1 basis-0">{product.title}</h1>
           </div>
-          <Rating />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2 items-end">
-            <span className="text-2xl text-red-500 font-semibold">
-              100.000 đ
-            </span>
-            <p>
-              <span className="text-normal leading-7 text-gray-500 font-semibold line-through">
-                120.000 đ
-              </span>
-            </p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <InStockStatus />
-          <DeliveryDate />
-          <ShippingAddress />
-        </div>
+        <Suspense
+          fallback={
+            <MyProductActions
+              disabled={true}
+              product={product}
+              region={region}
+            />
+          }
+        >
+          <MyProductActionsWrapper id={product.id} region={region} />
+        </Suspense>
         <div className="divider-line"></div>
         <div>
           <Overview content={product.description} />
@@ -67,12 +50,6 @@ const ProductDetail: React.FC<ProductTemplateProps> = ({ product, region }) => {
         <div>
           <Specifications product={product} />
         </div>
-        <div className="divider-line"></div>
-        <div>
-          <Reviews />
-        </div>
-        {/* Chỉ hiển thị Mobile Actions khi nút Thêm giỏ hàng khuất khỏi tầm nhìn */}
-        {/* <MobileActions />  */}
       </div>
     </div>
   )
@@ -85,66 +62,6 @@ const Rating = () => {
     <div className="flex items-center gap-1">
       <StarRating score={3.7} />
       <span className="text-sm">161 đánh giá</span>
-    </div>
-  )
-}
-
-const InStockStatus = () => {
-  return (
-    <div className="flex gap-1 items-center">
-      <FontAwesomeIcon icon={faCheck} color="#70e000" className="w-5 h-5" />
-      <div>
-        <span>Trạng thái: </span>
-        <span className="font-semibold">Còn hàng</span>
-      </div>
-    </div>
-  )
-}
-
-const DeliveryDate = () => {
-  return (
-    <div className="flex gap-1 items-center">
-      <FontAwesomeIcon icon={faTruck} color="#0077b6" className="w-5 h-5" />
-      <div>
-        <span>Thời gian vận chuyển: </span>
-        <span className="font-semibold">8-12 ngày</span>
-      </div>
-    </div>
-  )
-}
-
-const ShippingAddress = () => {
-  const addessList = [
-    "Số 1 Hoa Phượng, Q.2, Q.Phú Nhuận (chi nhánh: Rạch Miễu)",
-    "139 Lê Thị Riêng, P.Bến Thành, Q.1 (chi nhánh: Lê Thị Riêng)",
-    "215A Lý Thường Kiệt, P.15, Q.11 (chi nhánh: Phú Thọ)",
-    "110 Quốc Hương, Thảo Điền, Q.2 (chi nhánh: Thảo Điền)",
-    "101 K1 Ngõ 12 Láng Hạ, Q.Ba Đình (chi nhánh: Hà Nội)",
-  ]
-  return (
-    <div className="">
-      <Disclosure>
-        <span>Chọn địa điểm bạn muốn chuyển phát đến</span>
-        <DisclosureButton className="py-2">
-          <FontAwesomeIcon icon={faChevronDown} className="w-4 h-4 px-1" />
-        </DisclosureButton>
-        <DisclosurePanel className="text-gray-500 space-y-1">
-          {addessList.map((address, index) => (
-            <label
-              key={index}
-              className="flex items-start gap-1 px-2 py-1 border rounded-lg"
-            >
-              <input
-                type="radio"
-                name="address"
-                id={`address-${index}`}
-                className="mt-1 h-4 w-4"
-              />
-              <span>{address}</span>
-            </label>
-          ))}
-        </DisclosurePanel>
-      </Disclosure>
     </div>
   )
 }

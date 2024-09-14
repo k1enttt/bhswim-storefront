@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { clx } from "@medusajs/ui"
 
 const Search = ({className}: {className?: string}) => {
-  return <div className={clx("w-8 h-8 p-1", className)}>
-    <FontAwesomeIcon icon={faSearch} className="w-full h-full" />
+  return <div className={clx("w-10 h-10 p-1 flex items-center justify-center", className)}>
+    <FontAwesomeIcon icon={faSearch} className="w-6 h-6" />
   </div>
 }
 
