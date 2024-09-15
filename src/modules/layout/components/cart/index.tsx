@@ -14,7 +14,7 @@ const Cart = ({ className }: { className?: string }) => {
         fallback={
           <LocalizedClientLink
             className="hover:text-ui-fg-base flex gap-2"
-            href="/cart"
+            href="/checkout"
             data-testid="nav-cart-link"
           >
             <CartIcon totalItems={0} />  

@@ -73,15 +73,15 @@ const MyCartDropdown = ({
 
   return (
     <div
-      className="h-full z-50"
+      className="h-full z-20"
       onMouseEnter={openAndCancel}
       onMouseLeave={close}
     >
-      <Popover className="relative h-full">
+      <Popover className="relative h-full flex items-center">
         <Popover.Button className="h-full">
           <LocalizedClientLink
             className="hover:text-ui-fg-base flex items-center justify-center"
-            href="/cart"
+            href="/checkout"
             data-testid="nav-cart-link"
           >
             <CartIcon totalItems={totalItems} />

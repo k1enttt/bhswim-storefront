@@ -24,7 +24,7 @@ const ProductDetail: React.FC<ProductTemplateProps> = ({ product, region }) => {
   return (
     <div className="space-y-4">
       <Slider images={product.images} />
-      <div className="space-y-4">
+      <div className="content-container space-y-4">
         <div>
           <div className="flex items-start justify-between">
             <h1 className="text-2xl flex-1 basis-0">{product.title}</h1>

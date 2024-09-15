@@ -1,9 +1,7 @@
 import { getRegion } from "@lib/data"
 import ProductDetail from "@modules/products/templates/product-detail"
-import { notFound, useRouter } from "next/navigation"
-import { getPricedProductByHandle } from "../(main)/products/[handle]/page"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
+import { notFound } from "next/navigation"
+import { getPricedProductByHandle } from "../products/[handle]/page"
 
 export default async function ProductDetailPage({
   params: { countryCode, productId },
@@ -24,7 +22,7 @@ export default async function ProductDetailPage({
   
 
   return (
-    <div className="">
+    <div>
       <ProductDetail product={pricedProduct} region={region} />
     </div>
   )
