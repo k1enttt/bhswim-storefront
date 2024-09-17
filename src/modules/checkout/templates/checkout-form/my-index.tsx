@@ -4,7 +4,10 @@ import {
   listCartShippingMethods,
 } from "@lib/data"
 import { getCheckoutStep } from "@lib/util/get-checkout-step"
+import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
 import Addresses from "@modules/checkout/components/addresses"
+import MyAddresses from "@modules/checkout/components/addresses/my-index"
+import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
@@ -44,6 +47,27 @@ export default async function MyCheckoutForm() {
   return (
     <div>
       <div className="w-full grid grid-cols-1 gap-y-8">
+        <div>
+          <h1 className="heading-1">Xác nhận thanh toán</h1>
+          <div className="mb-6">
+            <h2 className="heading-2">Chi tiết đơn hàng</h2>
+            <div>
+              <MyItemsPreviewTemplate
+                region={cart?.region}
+                items={cart?.items}
+              />
+            </div>
+          </div>
+          <div className="mb-6 space-y-2">
+            <h2 className="heading-2">Mã giảm giá / thẻ quà tặng</h2>
+            <div>
+              <MyDiscountCode cart={cart} />
+            </div>
+          </div>
+          <div className="mb-6">
+            <MyAddresses cart={cart} customer={customer} />
+          </div>
+        </div>
         <div>
           <Addresses cart={cart} customer={customer} />
         </div>
