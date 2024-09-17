@@ -12,6 +12,7 @@ import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
 import { cookies } from "next/headers"
+import { notFound } from "next/navigation"
 import { CartWithCheckoutStep } from "types/global"
 
 export default async function MyCheckoutForm() {
@@ -28,6 +29,10 @@ export default async function MyCheckoutForm() {
 
   if (!cart) {
     return null
+  }
+
+  if (!cart?.items.length) {
+    return notFound()
   }
 
   cart.checkout_step = cart && getCheckoutStep(cart)

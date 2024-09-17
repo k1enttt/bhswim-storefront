@@ -1,6 +1,5 @@
 "use client"
 
-import { InformationCircleSolid } from "@medusajs/icons"
 import { Cart } from "@medusajs/medusa"
 import { Heading, Label, Text, Tooltip } from "@medusajs/ui"
 import React, { useMemo } from "react"
@@ -22,8 +21,6 @@ type DiscountCodeProps = {
 }
 
 const MyDiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
-
   const { discounts, gift_cards, region } = cart
 
   const appliedDiscount = useMemo(() => {

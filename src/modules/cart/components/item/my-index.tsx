@@ -7,14 +7,14 @@ import CartItemSelect from "@modules/cart/components/cart-item-select"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
-import { updateLineItem } from "@modules/cart/actions"
+import { deleteLineItem, updateLineItem } from "@modules/cart/actions"
 import Spinner from "@modules/common/icons/spinner"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import MyLineItemOptions from "@modules/common/components/line-item-options/my-index"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons"
+import { faMinus, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons"
 import MyLineItemPrice from "@modules/common/components/line-item-price/my-index"
 
 type ItemProps = {
@@ -28,6 +28,10 @@ const MyItem = ({ item, region, type = "full" }: ItemProps) => {
   const [error, setError] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(item.quantity)
   const [disabled, setDisabled] = useState(false)
+  // The below variable is used to determine if the item is being deleted
+  const [deleting, setDeleting] = useState(false)
+  const [swipePosition, setSwipePosition] = useState(0)
+  const startX = useRef(0)
 
   const { handle } = item.variant.product
 
@@ -57,10 +61,12 @@ const MyItem = ({ item, region, type = "full" }: ItemProps) => {
 
   const handleDecrease = () => {
     setDisabled(true)
-    if (quantity > 0) {
+    if (quantity > 1) {
       const updatedValue = quantity - 1
       setQuantity(updatedValue)
       onChangeComplete(updatedValue)
+    } else {
+      handleDelete(item.id)
     }
   }
 
@@ -73,9 +79,57 @@ const MyItem = ({ item, region, type = "full" }: ItemProps) => {
     }
   }
 
+  const handleDelete = async (id: string) => {
+    await deleteLineItem(id).catch((err) => {
+      setDeleting(false)
+    })
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touchX = e.touches[0].clientX
+    const deltaX = touchX - startX.current
+    if (deltaX < 0) {
+      setSwipePosition(Math.max(deltaX, -80))
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (swipePosition < -50) {
+      setDeleting(true)
+      handleDelete(item.id)
+    }
+    setSwipePosition(0)
+  }
+
   return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="!pl-0 p-4 w-24">
+    <Table.Row
+      className={clx(
+        "relative overflow-hidden w-full",
+        deleting && "opacity-50 pointer-events-none"
+      )}
+      data-testid="product-row"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* The red delete button at the background */}
+      <Table.Cell className="absolute inset-0 h-full flex items-center justify-end bg-red-500 text-white">
+        <FontAwesomeIcon icon={faTrash} className="mr-4" />
+      </Table.Cell>
+      {/* The white background of the item */}
+      <Table.Cell
+        className="absolute inset-0 h-full flex items-center justify-end bg-white"
+        style={{ transform: `translateX(${swipePosition}px)` }}
+      ></Table.Cell>
+      {/* Item contents */}
+      <Table.Cell
+        className="!pl-0 p-4 w-24"
+        style={{ transform: `translateX(${swipePosition}px)` }}
+      >
         <LocalizedClientLink
           href={`/products/${handle}`}
           className={clx("flex", {
@@ -87,7 +141,10 @@ const MyItem = ({ item, region, type = "full" }: ItemProps) => {
         </LocalizedClientLink>
       </Table.Cell>
 
-      <Table.Cell className="text-left">
+      <Table.Cell
+        className="text-left"
+        style={{ transform: `translateX(${swipePosition}px)` }}
+      >
         <Text
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
@@ -138,7 +195,10 @@ const MyItem = ({ item, region, type = "full" }: ItemProps) => {
         </Table.Cell>
       )}
 
-      <Table.Cell className="!pr-0">
+      <Table.Cell
+        className="!pr-0"
+        style={{ transform: `translateX(${swipePosition}px)` }}
+      >
         <span
           className={clx("!pr-0", {
             "flex flex-col items-end h-full justify-center": type === "preview",
