@@ -8,7 +8,7 @@ import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
 import Addresses from "@modules/checkout/components/addresses"
 import MyAddresses from "@modules/checkout/components/addresses/my-index"
 import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
-import Payment from "@modules/checkout/components/payment"
+import MyPayment from "@modules/checkout/components/payment/my-index"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
 import { cookies } from "next/headers"
@@ -52,27 +52,32 @@ export default async function MyCheckoutForm() {
   return (
     <div>
       <div className="w-full grid grid-cols-1 gap-y-8">
-        <div>
-          <h1 className="heading-1">Xác nhận thanh toán</h1>
-          <div className="mb-6">
-            <h2 className="heading-2">Chi tiết đơn hàng</h2>
-            <div>
-              <MyItemsPreviewTemplate
-                region={cart?.region}
-                items={cart?.items}
-              />
-            </div>
-          </div>
-          <div className="mb-6 space-y-2">
-            <h2 className="heading-2">Mã giảm giá / thẻ quà tặng</h2>
-            <div>
-              <MyDiscountCode cart={cart} />
-            </div>
-          </div>
-          <div className="mb-6">
-            <MyAddresses cart={cart} customer={customer} />
+        <h1 className="heading-1">Xác nhận thanh toán</h1>
+        <div className="mb-6">
+          <h2 className="heading-2">Chi tiết đơn hàng</h2>
+          <div>
+            <MyItemsPreviewTemplate region={cart?.region} items={cart?.items} />
           </div>
         </div>
+        <div className="mb-6 space-y-2">
+          <h2 className="heading-2">Mã giảm giá</h2>
+          <div>
+            <MyDiscountCode cart={cart} />
+          </div>
+        </div>
+
+        <div>
+          <MyPayment cart={cart} />
+        </div>
+
+        <div className="mb-6">
+          <MyAddresses cart={cart} customer={customer} />
+        </div>
+
+        <div>
+          <Review cart={cart} />
+        </div>
+
         <div>
           <Addresses cart={cart} customer={customer} />
         </div>
@@ -82,14 +87,6 @@ export default async function MyCheckoutForm() {
             cart={cart}
             availableShippingMethods={availableShippingMethods}
           />
-        </div>
-
-        <div>
-          <Payment cart={cart} />
-        </div>
-
-        <div>
-          <Review cart={cart} />
         </div>
       </div>
     </div>
