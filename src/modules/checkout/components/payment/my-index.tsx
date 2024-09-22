@@ -1,7 +1,6 @@
 "use client"
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import {  useContext, useMemo, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { Cart } from "@medusajs/medusa"
@@ -16,7 +15,6 @@ import { setPaymentMethod } from "@modules/checkout/actions"
 import { paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import MyPaymentContainer from "../payment-container/my-index"
-import FastDelivery from "@modules/common/icons/fast-delivery"
 import Radio from "@modules/common/components/radio"
 import VietQRLogo from "@modules/common/components/vietqr-logo"
 
@@ -29,13 +27,7 @@ const MyPayment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [isVietQr, setIsVietQr] = useState(false)
-
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const isOpen = searchParams.get("step") === "payment"
+  const [isVietQr, setIsVietQr] = useState(!!cart?.billing_address?.metadata?.isVietQRPayment)
 
   const isStripe = cart?.payment_session?.provider_id === "stripe"
   const stripeReady = useContext(StripeContext)
@@ -64,16 +56,6 @@ const MyPayment = ({
     }
   }, [])
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set(name, value)
-
-      return params.toString()
-    },
-    [searchParams]
-  )
-
   const set = async (providerId: string) => {
     setIsLoading(true)
     await setPaymentMethod(providerId)
@@ -86,31 +68,13 @@ const MyPayment = ({
 
   const handleChange = (providerId: string) => {
     setError(null)
-    if (providerId === "vietqr") {
+    if (providerId == "vietqr") {
       setIsVietQr(true)
     } else {
       setIsVietQr(false)
-      set(providerId)
     }
+    set(providerId)
   }
-
-  const handleEdit = () => {
-    router.push(pathname + "?" + createQueryString("step", "payment"), {
-      scroll: false,
-    })
-  }
-
-  const handleSubmit = () => {
-    setIsLoading(true)
-    router.push(pathname + "?" + createQueryString("step", "review"), {
-      scroll: false,
-    })
-  }
-
-  useEffect(() => {
-    setIsLoading(false)
-    setError(null)
-  }, [isOpen])
 
   return (
     <div className="bg-white">
@@ -122,7 +86,9 @@ const MyPayment = ({
           {!paidByGiftcard && cart?.payment_sessions?.length ? (
             <>
               <RadioGroup
-                value={(isVietQr) ? "vietqr" : cart.payment_session?.provider_id || ""}
+                value={
+                  isVietQr ? "vietqr" : cart.payment_session?.provider_id || ""
+                }
                 onChange={(value: string) => handleChange(value)}
               >
                 {cart.payment_sessions
@@ -143,20 +109,17 @@ const MyPayment = ({
                     )
                   })}
                 <RadioGroup.Option
-                  value={"vietqr"}
+                  value="vietqr"
                   className={clx(
                     "flex flex-col gap-y-2 text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
                     {
-                      "border-ui-border-interactive":
-                        isVietQr,
+                      "border-ui-border-interactive": isVietQr,
                     }
                   )}
                 >
                   <div className="flex items-center justify-between ">
                     <div className="flex items-center gap-x-4">
-                      <Radio
-                        checked={isVietQr}
-                      />
+                      <Radio checked={isVietQr} />
                       <VietQRLogo size={60} />
                       <div className="">
                         <Text className="text-base-regular">VietQR</Text>

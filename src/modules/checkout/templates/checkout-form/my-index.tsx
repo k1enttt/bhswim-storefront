@@ -5,12 +5,9 @@ import {
 } from "@lib/data"
 import { getCheckoutStep } from "@lib/util/get-checkout-step"
 import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
-import Addresses from "@modules/checkout/components/addresses"
 import MyAddresses from "@modules/checkout/components/addresses/my-index"
 import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
 import MyPayment from "@modules/checkout/components/payment/my-index"
-import Review from "@modules/checkout/components/review"
-import Shipping from "@modules/checkout/components/shipping"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { CartWithCheckoutStep } from "types/global"
@@ -72,21 +69,6 @@ export default async function MyCheckoutForm() {
 
         <div className="mb-6">
           <MyAddresses cart={cart} customer={customer} />
-        </div>
-
-        <div>
-          <Review cart={cart} />
-        </div>
-
-        <div>
-          <Addresses cart={cart} customer={customer} />
-        </div>
-
-        <div>
-          <Shipping
-            cart={cart}
-            availableShippingMethods={availableShippingMethods}
-          />
         </div>
       </div>
     </div>

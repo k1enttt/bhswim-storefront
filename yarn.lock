@@ -1146,6 +1146,14 @@
   resolved "https://registry.npmjs.org/@oclif/screen/-/screen-1.0.4.tgz"
   integrity sha512-60CHpq+eqnTxLZQ4PGHYNwUX572hgpMHGPtTWMjdTMsAvlm69lZV/4ly6O3sAYkomo4NggGcomrDpBe34rxUqw==
 
+"@payos/node@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/@payos/node/-/node-1.0.8.tgz"
+  integrity sha512-W0I0MwDx1c9lCv8pcOstT7vJGHOpLnc6F/cWBgjetCDv5VKRIeNQ60qGDtsNPUbz+laD81KrtP+eYWqF7DjEGQ==
+  dependencies:
+    axios "^1.5.0"
+    crypto "^1.0.1"
+
 "@paypal/paypal-js@^5.0.6", "@paypal/paypal-js@^5.1.6":
   version "5.1.6"
   resolved "https://registry.npmjs.org/@paypal/paypal-js/-/paypal-js-5.1.6.tgz"
@@ -2615,7 +2623,7 @@ axios-retry@^3.1.9:
     "@babel/runtime" "^7.15.4"
     is-retry-allowed "^2.2.0"
 
-axios@*, axios@^1.6.7:
+axios@*, axios@^1.5.0, axios@^1.6.7:
   version "1.6.7"
   resolved "https://registry.npmjs.org/axios/-/axios-1.6.7.tgz"
   integrity sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==
@@ -3372,6 +3380,11 @@ crypto-random-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/crypto-random-string/-/crypto-random-string-2.0.0.tgz"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
+
+crypto@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/crypto/-/crypto-1.0.1.tgz"
+  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
 
 cssesc@^3.0.0:
   version "3.0.0"
@@ -6115,6 +6128,11 @@ pause@0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
+
+payos-checkout@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/payos-checkout/-/payos-checkout-1.0.8.tgz"
+  integrity sha512-PYYSTF7lO8GV6ppjbrfHz8mXmRBI1KlXUf/fe2Q/DRzp06xnp/QP52nJ4z/mJG2HSsRnW1kEOOm99MkXUzXAug==
 
 pg-cloudflare@^1.1.0, pg-cloudflare@^1.1.1:
   version "1.1.1"

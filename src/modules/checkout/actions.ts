@@ -12,6 +12,8 @@ import {
 import { GiftCard, StorePostCartsCartReq } from "@medusajs/medusa"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { CheckoutRequestType } from "@payos/node/lib/type"
+import { payOS } from "@lib/config"
 
 export async function cartUpdate(data: StorePostCartsCartReq) {
   const cartId = cookies().get("_medusa_cart_id")?.value
@@ -170,15 +172,46 @@ export async function setShippingMethod(shippingMethodId: string) {
   }
 }
 
+async function updateVietQRPayment(value: boolean) {
+  const cartId = cookies().get("_medusa_cart_id")?.value
+
+  if (!cartId) throw new Error("No cartId cookie found")
+
+  try {
+    const cart = await updateCart(cartId, {
+      billing_address: {
+        metadata: {
+          isVietQRPayment: value,
+        },
+      },
+    })
+    revalidateTag("cart")
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
 export async function setPaymentMethod(providerId: string) {
   const cartId = cookies().get("_medusa_cart_id")?.value
 
   if (!cartId) throw new Error("No cartId cookie found")
 
   try {
-    const cart = await setPaymentSession({ cartId, providerId })
-    revalidateTag("cart")
-    return cart
+    if (providerId != "vietqr") {
+      const cart = await setPaymentSession({ cartId, providerId }).then(
+        async () => {
+          const cart = await updateVietQRPayment(false)
+          return cart
+        }
+      )
+      revalidateTag("cart")
+      return cart
+    } else {
+      const cart = await updateVietQRPayment(true)
+      revalidateTag("cart")
+      return cart
+    }
   } catch (error: any) {
     throw error
   }
@@ -205,4 +238,33 @@ export async function placeOrder() {
   }
 
   return cart
+}
+
+export const createVietQRPaymentLink = async ({
+  amount,
+  description,
+  items,
+}: {
+  amount: number
+  description: string
+  items: { name: string; quantity: number; price: number }[]
+}) => {
+  const countryCode = cookies().get("country_code")?.value || "vn"
+
+  const body: CheckoutRequestType = {
+    orderCode: Number(String(Date.now()).slice(-6)),
+    amount: amount,
+    description: description,
+    items: items,
+    returnUrl: `https://bhswimstorefront.kienttt.site/${countryCode}/checkout`,
+    cancelUrl: `https://bhswimstorefront.kienttt.site/${countryCode}/checkout`,
+  }
+
+  try {
+    const response = await payOS.createPaymentLink(body)
+    return { checkoutUrl: response.checkoutUrl }
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
