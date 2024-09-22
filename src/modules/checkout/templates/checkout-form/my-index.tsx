@@ -8,6 +8,8 @@ import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
 import MyAddresses from "@modules/checkout/components/addresses/my-index"
 import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
 import MyPayment from "@modules/checkout/components/payment/my-index"
+import CartTotals from "@modules/common/components/cart-totals"
+import MyCartTotals from "@modules/common/components/cart-totals/my-index"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { CartWithCheckoutStep } from "types/global"
@@ -65,6 +67,10 @@ export default async function MyCheckoutForm() {
 
         <div>
           <MyPayment cart={cart} />
+        </div>
+
+        <div>
+          <MyCartTotals data={cart} />
         </div>
 
         <div className="mb-6">

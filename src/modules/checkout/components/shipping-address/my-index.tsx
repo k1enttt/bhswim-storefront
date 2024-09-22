@@ -85,64 +85,15 @@ const MyShippingAddress = ({
         </Container>
       )}
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="Tên"
-            name="shipping_address.first_name"
-            autoComplete="given-name"
-            value={formData["shipping_address.first_name"]}
-            onChange={handleChange}
-            required
-            data-testid="shipping-first-name-input"
-          />
-          <Input
-            label="Họ"
-            name="shipping_address.last_name"
-            autoComplete="family-name"
-            value={formData["shipping_address.last_name"]}
-            onChange={handleChange}
-            required
-            data-testid="shipping-last-name-input"
-          />
-        </div>
-
         <Input
-          label="Địa chỉ"
-          name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
+          label="Họ và tên"
+          name="shipping_address.first_name"
+          autoComplete="given-name"
+          value={formData["shipping_address.first_name"]}
           onChange={handleChange}
           required
-          data-testid="shipping-address-input"
+          data-testid="shipping-first-name-input"
         />
-        <Input
-          label="City"
-          name="shipping_address.city"
-          autoComplete="address-level2"
-          value={formData["shipping_address.city"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-city-input"
-        />
-        <Input
-          label="State / Province"
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-          data-testid="shipping-province-input"
-        />
-      </div>
-      <div className="my-8">
-        <Checkbox
-          label="Billing address same as shipping address"
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-          data-testid="billing-address-checkbox"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
           label="Email"
           name="email"
@@ -155,12 +106,22 @@ const MyShippingAddress = ({
           data-testid="shipping-email-input"
         />
         <Input
-          label="Phone"
+          label="Số điện thoại"
           name="shipping_address.phone"
           autoComplete="tel"
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
           data-testid="shipping-phone-input"
+          required
+        />
+        <Input
+          label="Địa chỉ"
+          name="shipping_address.address_1"
+          autoComplete="address-line1"
+          value={formData["shipping_address.address_1"]}
+          onChange={handleChange}
+          required
+          data-testid="shipping-address-input"
         />
       </div>
     </>
