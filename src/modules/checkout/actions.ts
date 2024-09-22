@@ -250,14 +250,15 @@ export const createVietQRPaymentLink = async ({
   items: { name: string; quantity: number; price: number }[]
 }) => {
   const countryCode = cookies().get("country_code")?.value || "vn"
+  const pathname = "https://bhswimstorefront.kienttt.site"
 
   const body: CheckoutRequestType = {
     orderCode: Number(String(Date.now()).slice(-6)),
     amount: amount,
     description: description,
     items: items,
-    returnUrl: `https://bhswimstorefront.kienttt.site/${countryCode}/checkout`,
-    cancelUrl: `https://bhswimstorefront.kienttt.site/${countryCode}/checkout`,
+    returnUrl: `${pathname}/${countryCode}/checkout`,
+    cancelUrl: `${pathname}/${countryCode}/checkout`,
   }
 
   try {

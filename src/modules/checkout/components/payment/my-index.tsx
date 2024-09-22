@@ -1,6 +1,6 @@
 "use client"
 
-import {  useContext, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { Cart } from "@medusajs/medusa"
@@ -11,12 +11,17 @@ import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
-import { setPaymentMethod } from "@modules/checkout/actions"
+import {
+  createVietQRPaymentLink,
+  setPaymentMethod,
+} from "@modules/checkout/actions"
 import { paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import MyPaymentContainer from "../payment-container/my-index"
 import Radio from "@modules/common/components/radio"
 import VietQRLogo from "@modules/common/components/vietqr-logo"
+import { PayOSConfig, usePayOS } from "payos-checkout"
+import { useParams } from "next/navigation"
 
 const MyPayment = ({
   cart,
@@ -27,7 +32,15 @@ const MyPayment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [isVietQr, setIsVietQr] = useState(!!cart?.billing_address?.metadata?.isVietQRPayment)
+  const [isVietQr, setIsVietQr] = useState(
+    !!cart?.billing_address?.metadata?.isVietQRPayment
+  )
+  // These below variables are used for VietQR payment method
+  const [isOpen, setIsOpen] = useState(false)
+  const [message, setMessage] = useState("")
+  const [isCreatingLink, setIsCreatingLink] = useState(false)
+  const countryCode = useParams().country_code || "vn"
+  const [isPaymentSuccess, setIsPaymentSuccess] = useState(false)
 
   const isStripe = cart?.payment_session?.provider_id === "stripe"
   const stripeReady = useContext(StripeContext)
@@ -63,6 +76,9 @@ const MyPayment = ({
       .finally(() => {
         if (providerId === "paypal") return
         setIsLoading(false)
+        if (providerId === "vietqr") {
+          handlePayment()
+        }
       })
   }
 
@@ -72,9 +88,74 @@ const MyPayment = ({
       setIsVietQr(true)
     } else {
       setIsVietQr(false)
+      setIsOpen(false)
+      exit()
     }
     set(providerId)
   }
+
+  const [payOSConfig, setPayOSConfig] = useState<PayOSConfig>({
+    RETURN_URL:
+      typeof window !== "undefined"
+        ? `${window.location.origin}/${countryCode}/checkout`
+        : "", // required
+    ELEMENT_ID: "embbed-checkout-form", // required
+    CHECKOUT_URL: "", // required
+    embedded: true, // Nếu dùng giao diện nhúng
+    onSuccess: () => {
+      //TODO: Hành động sau khi người dùng thanh toán đơn hàng thành công
+      setIsOpen(false)
+      setIsPaymentSuccess(true)
+      setMessage("Thanh toan thanh cong")
+    },
+    onExit: () => {
+      setIsOpen(false)
+      console.log("Thanh toan bi huy")
+    },
+    onCancel: () => {
+      setIsOpen(false)
+      setMessage("Thanh toan bi huy")
+    },
+  })
+
+  const { open, exit } = usePayOS(payOSConfig)
+
+  const handlePayment = async () => {
+    exit()
+    setIsCreatingLink(true)
+
+    const response = await createVietQRPaymentLink({
+      amount: 10000,
+      description: "Thanh toan don hang",
+      items: [
+        {
+          name: "Mỳ Hảo Hảo chua cay",
+          quantity: 1,
+          price: 10000,
+        },
+      ],
+    })
+
+    setPayOSConfig({
+      ...payOSConfig,
+      CHECKOUT_URL: response.checkoutUrl,
+    })
+
+    setIsCreatingLink(false)
+    setIsOpen(true)
+  }
+
+  useEffect(() => {
+    if (payOSConfig.CHECKOUT_URL != "" && !isPaymentSuccess) {
+      open()
+    }
+  }, [payOSConfig])
+
+  useEffect(() => {
+    if (!!cart?.billing_address?.metadata?.isVietQRPayment) {
+      handlePayment()
+    }
+  }, [cart])
 
   return (
     <div className="bg-white">
@@ -82,7 +163,7 @@ const MyPayment = ({
         <h2 className="heading-2">Hình thức thanh toán</h2>
       </div>
       <div>
-        <div>
+        <div className={clx(isLoading || isPaymentSuccess ? "pointer-events-none opacity-50" : "")}>
           {!paidByGiftcard && cart?.payment_sessions?.length ? (
             <>
               <RadioGroup
@@ -129,6 +210,21 @@ const MyPayment = ({
                   </div>
                 </RadioGroup.Option>
               </RadioGroup>
+              {message ? (
+                <div className="text-green-500 border border-green-500 rounded-lg p-2 w-full">
+                  {message}
+                </div>
+              ) : null}
+              <div
+                id="embbed-checkout-form"
+                className={clx((isOpen || isCreatingLink) && !isPaymentSuccess ? "h-[23em]" : "")}
+              >
+                {!isOpen && isCreatingLink ? (
+                  <div className="h-full flex items-center justify-center">
+                    <Spinner size={40} />
+                  </div>
+                ) : null}
+              </div>
               {isStripe && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
                   <Text className="txt-medium-plus text-ui-fg-base mb-1">
