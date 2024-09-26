@@ -206,6 +206,11 @@ const MyPayment = ({
                   {message}
                 </div>
               ) : null}
+              {
+                isPaymentSuccess && (<div className="text-blue-500 border border-blue-500 rounded-lg p-2 w-full">
+                  Sau khi hoàn tất thanh toán, xin vui lòng chờ 5-10 giây để hệ thống cập nhật đơn hàng.
+                </div>)
+              }
               <div
                 id="embbed-checkout-form"
                 className={clx(
