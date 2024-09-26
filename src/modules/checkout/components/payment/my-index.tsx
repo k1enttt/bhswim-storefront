@@ -1,22 +1,20 @@
 "use client"
 
-import { useContext, useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { Cart } from "@medusajs/medusa"
 import { CreditCard } from "@medusajs/icons"
 import { clx, Container, Text, Tooltip } from "@medusajs/ui"
-import { CardElement } from "@stripe/react-stripe-js"
-import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import {
   createVietQRPaymentLink,
   setPaymentMethod,
+  updatePaymentStatus,
 } from "@modules/checkout/actions"
 import { paymentInfoMap } from "@lib/constants"
-import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import MyPaymentContainer from "../payment-container/my-index"
 import Radio from "@modules/common/components/radio"
 import VietQRLogo from "@modules/common/components/vietqr-logo"
@@ -30,10 +28,8 @@ const MyPayment = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [cardBrand, setCardBrand] = useState<string | null>(null)
-  const [cardComplete, setCardComplete] = useState(false)
   const [isVietQr, setIsVietQr] = useState(
-    !!cart?.billing_address?.metadata?.isVietQRPayment
+    !!cart?.shipping_address?.metadata?.isVietQRPayment
   )
   // These below variables are used for VietQR payment method
   const [isOpen, setIsOpen] = useState(false)
@@ -42,9 +38,6 @@ const MyPayment = ({
   const countryCode = useParams().country_code || "vn"
   const [isPaymentSuccess, setIsPaymentSuccess] = useState(false)
 
-  const isStripe = cart?.payment_session?.provider_id === "stripe"
-  const stripeReady = useContext(StripeContext)
-
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
@@ -52,32 +45,16 @@ const MyPayment = ({
     (cart?.payment_session && cart?.shipping_methods.length !== 0) ||
     paidByGiftcard
 
-  const useOptions: StripeCardElementOptions = useMemo(() => {
-    return {
-      style: {
-        base: {
-          fontFamily: "Inter, sans-serif",
-          color: "#424270",
-          "::placeholder": {
-            color: "rgb(107 114 128)",
-          },
-        },
-      },
-      classes: {
-        base: "pt-3 pb-1 block w-full h-11 px-4 mt-0 bg-ui-bg-field border rounded-md appearance-none focus:outline-none focus:ring-0 focus:shadow-borders-interactive-with-active border-ui-border-base hover:bg-ui-bg-field-hover transition-all duration-300 ease-in-out",
-      },
-    }
-  }, [])
-
   const set = async (providerId: string) => {
     setIsLoading(true)
     await setPaymentMethod(providerId)
       .catch((err) => setError(err.toString()))
       .finally(() => {
         if (providerId === "paypal") return
-        setIsLoading(false)
         if (providerId === "vietqr") {
           handlePayment()
+        } else {
+          setIsLoading(false)
         }
       })
   }
@@ -94,6 +71,10 @@ const MyPayment = ({
     set(providerId)
   }
 
+  const onCheckoutSuccess = async () => {
+    await updatePaymentStatus(true);
+  }
+
   const [payOSConfig, setPayOSConfig] = useState<PayOSConfig>({
     RETURN_URL:
       typeof window !== "undefined"
@@ -106,6 +87,7 @@ const MyPayment = ({
       //TODO: Hành động sau khi người dùng thanh toán đơn hàng thành công
       setIsOpen(false)
       setIsPaymentSuccess(true)
+      onCheckoutSuccess()
       setMessage("Thanh toan thanh cong")
     },
     onExit: () => {
@@ -124,16 +106,18 @@ const MyPayment = ({
     exit()
     setIsCreatingLink(true)
 
+    const items = (cart) ? cart.items.map((item) => {
+      return {
+        name: item.title,
+        quantity: item.quantity,
+        price: item.total || 0,
+      }
+    }) : [];
+
     const response = await createVietQRPaymentLink({
       amount: 10000,
       description: "Thanh toan don hang",
-      items: [
-        {
-          name: "Mỳ Hảo Hảo chua cay",
-          quantity: 1,
-          price: 10000,
-        },
-      ],
+      items: items,
     })
 
     setPayOSConfig({
@@ -143,6 +127,7 @@ const MyPayment = ({
 
     setIsCreatingLink(false)
     setIsOpen(true)
+    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -152,7 +137,7 @@ const MyPayment = ({
   }, [payOSConfig])
 
   useEffect(() => {
-    if (!!cart?.billing_address?.metadata?.isVietQRPayment) {
+    if (!!cart?.shipping_address?.metadata?.isVietQRPayment) {
       handlePayment()
     }
   }, [cart])
@@ -163,7 +148,13 @@ const MyPayment = ({
         <h2 className="heading-2">Hình thức thanh toán</h2>
       </div>
       <div>
-        <div className={clx(isLoading || isPaymentSuccess ? "pointer-events-none opacity-50" : "")}>
+        <div
+          className={clx(
+            isLoading || isPaymentSuccess
+              ? "pointer-events-none opacity-50"
+              : ""
+          )}
+        >
           {!paidByGiftcard && cart?.payment_sessions?.length ? (
             <>
               <RadioGroup
@@ -217,7 +208,11 @@ const MyPayment = ({
               ) : null}
               <div
                 id="embbed-checkout-form"
-                className={clx((isOpen || isCreatingLink) && !isPaymentSuccess ? "h-[23em]" : "")}
+                className={clx(
+                  (isOpen || isCreatingLink) && !isPaymentSuccess
+                    ? "h-[23em]"
+                    : ""
+                )}
               >
                 {!isOpen && isCreatingLink ? (
                   <div className="h-full flex items-center justify-center">
@@ -225,25 +220,6 @@ const MyPayment = ({
                   </div>
                 ) : null}
               </div>
-              {isStripe && stripeReady && (
-                <div className="mt-5 transition-all duration-150 ease-in-out">
-                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                    Enter your card details:
-                  </Text>
-
-                  <CardElement
-                    options={useOptions as StripeCardElementOptions}
-                    onChange={(e) => {
-                      setCardBrand(
-                        e.brand &&
-                          e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
-                      )
-                      setError(e.error?.message || null)
-                      setCardComplete(e.complete)
-                    }}
-                  />
-                </div>
-              )}
             </>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
@@ -293,7 +269,7 @@ const MyPayment = ({
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment details
+                  Chi tiết thanh toán
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
@@ -304,11 +280,6 @@ const MyPayment = ({
                       <CreditCard />
                     )}
                   </Container>
-                  <Text>
-                    {cart.payment_session.provider_id === "stripe" && cardBrand
-                      ? cardBrand
-                      : "Another step will appear"}
-                  </Text>
                 </div>
               </div>
             </div>

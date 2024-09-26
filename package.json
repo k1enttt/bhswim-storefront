@@ -8,9 +8,9 @@
     "medusa-storefront"
   ],
   "scripts": {
-    "dev": "next dev -p 8181",
+    "dev": "next dev -p 8189",
     "build": "next build",
-    "start": "next start -p 8181",
+    "start": "next start -p 8189",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
     "test-e2e": "playwright test e2e"

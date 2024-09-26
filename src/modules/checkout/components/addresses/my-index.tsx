@@ -1,42 +1,33 @@
 "use client"
 
 import {
-  useSearchParams,
-  useRouter,
-  usePathname,
   useParams,
 } from "next/navigation"
 import { Cart, Customer } from "@medusajs/medusa"
-import { CheckCircleSolid } from "@medusajs/icons"
-import { Heading, Text, useToggleState } from "@medusajs/ui"
-
-import Divider from "@modules/common/components/divider"
-import Spinner from "@modules/common/icons/spinner"
+import { Heading, useToggleState } from "@medusajs/ui"
 
 import BillingAddress from "../billing_address"
-import ShippingAddress from "../shipping-address"
 import { setAddresses } from "../../actions"
-import { SubmitButton } from "../submit-button"
 import { useFormState } from "react-dom"
 import ErrorMessage from "../error-message"
 import compareAddresses from "@lib/util/compare-addresses"
 import MyShippingAddress from "../shipping-address/my-index"
+import { Dispatch } from "react"
 
 const MyAddresses = ({
   cart,
   customer,
+  formData, 
+  setFormData,
 }: {
   cart: Omit<Cart, "refundable_amount" | "refunded_total"> | null
   customer: Omit<Customer, "password_hash"> | null
+  formData: any
+  setFormData: Dispatch<any>
 }) => {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
   const params = useParams()
 
   const countryCode = params.countryCode as string
-
-  const isOpen = searchParams.get("step") === "address"
 
   const { state: sameAsSBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
@@ -59,6 +50,8 @@ const MyAddresses = ({
             checked={sameAsSBilling}
             onChange={toggleSameAsBilling}
             cart={cart}
+            formData={formData}
+            setFormData={setFormData}
           />
 
           {!sameAsSBilling && (
@@ -76,7 +69,6 @@ const MyAddresses = ({
           <ErrorMessage error={message} data-testid="address-error-message" />
         </div>
       </form>
-      <Divider className="mt-8" />
     </div>
   )
 }

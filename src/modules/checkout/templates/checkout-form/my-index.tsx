@@ -4,15 +4,15 @@ import {
   listCartShippingMethods,
 } from "@lib/data"
 import { getCheckoutStep } from "@lib/util/get-checkout-step"
-import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
-import MyAddresses from "@modules/checkout/components/addresses/my-index"
-import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
-import MyPayment from "@modules/checkout/components/payment/my-index"
-import CartTotals from "@modules/common/components/cart-totals"
-import MyCartTotals from "@modules/common/components/cart-totals/my-index"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { CartWithCheckoutStep } from "types/global"
+import MyItemsPreviewTemplate from "@modules/cart/templates/my-preview"
+import CheckoutActions from "@modules/checkout/components/checkout-actions"
+import MyDiscountCode from "@modules/checkout/components/discount-code/my-index"
+import MyPayment from "@modules/checkout/components/payment/my-index"
+import MyCartTotals from "@modules/common/components/cart-totals/my-index"
+
 
 export default async function MyCheckoutForm() {
   const cartId = cookies().get("_medusa_cart_id")?.value
@@ -50,14 +50,16 @@ export default async function MyCheckoutForm() {
 
   return (
     <div>
-      <div className="w-full grid grid-cols-1 gap-y-8">
+        <div className="w-full grid grid-cols-1 gap-y-8">
         <h1 className="heading-1">Xác nhận thanh toán</h1>
+
         <div className="mb-6">
           <h2 className="heading-2">Chi tiết đơn hàng</h2>
           <div>
             <MyItemsPreviewTemplate region={cart?.region} items={cart?.items} />
           </div>
         </div>
+
         <div className="mb-6 space-y-2">
           <h2 className="heading-2">Mã giảm giá</h2>
           <div>
@@ -74,7 +76,7 @@ export default async function MyCheckoutForm() {
         </div>
 
         <div className="mb-6">
-          <MyAddresses cart={cart} customer={customer} />
+          <CheckoutActions cart={cart} customer={customer} availableShippingMethods={availableShippingMethods} />
         </div>
       </div>
     </div>

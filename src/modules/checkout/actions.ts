@@ -9,7 +9,11 @@ import {
   setPaymentSession,
   updateCart,
 } from "@lib/data"
-import { GiftCard, StorePostCartsCartReq } from "@medusajs/medusa"
+import {
+  AddressPayload,
+  GiftCard,
+  StorePostCartsCartReq,
+} from "@medusajs/medusa"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { CheckoutRequestType } from "@payos/node/lib/type"
@@ -159,6 +163,40 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   )
 }
 
+export async function setMyAddresses(formData: any) {
+  if (!formData) return "No form data received"
+
+  const cartId = cookies().get("_medusa_cart_id")?.value
+
+  if (!cartId) return { message: "No cartId cookie found" }
+
+  const data = {
+    shipping_address: {
+      first_name: formData["shipping_address.first_name"],
+      last_name: formData["shipping_address.last_name"],
+      address_1: formData["shipping_address.address_1"],
+      address_2: "",
+      company: formData["shipping_address.company"],
+      postal_code: formData["shipping_address.postal_code"],
+      city: formData["shipping_address.city"],
+      country_code: formData["shipping_address.country_code"],
+      province: formData["shipping_address.province"],
+      phone: formData["shipping_address.phone"],
+      metadata: formData["shipping_address.metadata"],
+    },
+    email: formData["email"],
+  } as StorePostCartsCartReq
+
+  data.billing_address = data.shipping_address
+
+  try {
+    await updateCart(cartId, data)
+    revalidateTag("cart")
+  } catch (error: any) {
+    throw error
+  }
+}
+
 export async function setShippingMethod(shippingMethodId: string) {
   const cartId = cookies().get("_medusa_cart_id")?.value
 
@@ -179,9 +217,29 @@ async function updateVietQRPayment(value: boolean) {
 
   try {
     const cart = await updateCart(cartId, {
-      billing_address: {
+      shipping_address: {
         metadata: {
           isVietQRPayment: value,
+        },
+      },
+    })
+    revalidateTag("cart")
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
+export async function updatePaymentStatus(value: boolean) {
+  const cartId = cookies().get("_medusa_cart_id")?.value
+
+  if (!cartId) throw new Error("No cartId cookie found")
+
+  try {
+    const cart = await updateCart(cartId, {
+      shipping_address: {
+        metadata: {
+          isPaymentCompleted: value,
         },
       },
     })
@@ -238,6 +296,56 @@ export async function placeOrder() {
   }
 
   return cart
+}
+
+export async function placeMyOrder(paymentId: string) {
+  const cartId = cookies().get("_medusa_cart_id")?.value
+
+  if (!cartId) throw new Error("No cartId cookie found")
+
+  let cart
+
+  try {
+    cart = await completeCart(cartId)
+    revalidateTag("cart")
+  } catch (error: any) {
+    throw error
+  }
+
+  if (cart?.type === "order") {
+    const countryCode = cart.data.shipping_address?.country_code?.toLowerCase()
+    cookies().set("_medusa_cart_id", "", { maxAge: -1 })
+
+    try {
+      if (paymentId == "vietqr") {
+        await setPaymentCaptured(cart?.data.id)
+      }
+    } catch (error) {
+      throw error
+    }
+
+    redirect(`/${countryCode}/order/confirmed/${cart?.data.id}`)
+  }
+
+  return cart
+}
+
+export async function setPaymentCaptured(orderId: string) {
+  let LOCAL_BACKEND_URL = "http://localhost:9000"
+  let PUBLIC_BACKEND_URL = "https://bhswimbackend.kienttt.site"
+  try {
+    await fetch(
+      `${LOCAL_BACKEND_URL}/store/custom/order/${orderId}/capture/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+  } catch (error: any) {
+    throw new Error(error)
+  }
 }
 
 export const createVietQRPaymentLink = async ({
