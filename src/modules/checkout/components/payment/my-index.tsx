@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { Cart } from "@medusajs/medusa"
@@ -36,7 +36,9 @@ const MyPayment = ({
   const [message, setMessage] = useState("")
   const [isCreatingLink, setIsCreatingLink] = useState(false)
   const countryCode = useParams().country_code || "vn"
-  const [isPaymentSuccess, setIsPaymentSuccess] = useState(false)
+  const [isPaymentSuccess, setIsPaymentSuccess] = useState(
+    cart?.shipping_address?.metadata?.isPaymentCompleted || false
+  )
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
@@ -49,10 +51,10 @@ const MyPayment = ({
     setIsLoading(true)
     await setPaymentMethod(providerId)
       .catch((err) => setError(err.toString()))
-      .finally(() => {
+      .finally(async () => {
         if (providerId === "paypal") return
         if (providerId === "vietqr") {
-          handlePayment()
+          await handlePayment()
         } else {
           setIsLoading(false)
         }
@@ -72,7 +74,7 @@ const MyPayment = ({
   }
 
   const onCheckoutSuccess = async () => {
-    await updatePaymentStatus(true);
+    await updatePaymentStatus(true)
   }
 
   const [payOSConfig, setPayOSConfig] = useState<PayOSConfig>({
@@ -84,7 +86,6 @@ const MyPayment = ({
     CHECKOUT_URL: "", // required
     embedded: true, // Nếu dùng giao diện nhúng
     onSuccess: () => {
-      //TODO: Hành động sau khi người dùng thanh toán đơn hàng thành công
       setIsOpen(false)
       setIsPaymentSuccess(true)
       onCheckoutSuccess()
@@ -106,13 +107,15 @@ const MyPayment = ({
     exit()
     setIsCreatingLink(true)
 
-    const items = (cart) ? cart.items.map((item) => {
-      return {
-        name: item.title,
-        quantity: item.quantity,
-        price: item.total || 0,
-      }
-    }) : [];
+    const items = cart
+      ? cart.items.map((item) => {
+          return {
+            name: item.title,
+            quantity: item.quantity,
+            price: item.total || 0,
+          }
+        })
+      : []
 
     const response = await createVietQRPaymentLink({
       amount: 10000,
@@ -120,27 +123,27 @@ const MyPayment = ({
       items: items,
     })
 
-    setPayOSConfig({
-      ...payOSConfig,
+    setPayOSConfig((config) => ({
+      ...config,
       CHECKOUT_URL: response.checkoutUrl,
-    })
+    }))
 
-    setIsCreatingLink(false)
     setIsOpen(true)
+    setIsCreatingLink(false)
     setIsLoading(false)
   }
 
   useEffect(() => {
-    if (payOSConfig.CHECKOUT_URL != "" && !isPaymentSuccess) {
+    if (payOSConfig.CHECKOUT_URL != "") {
       open()
     }
   }, [payOSConfig])
 
   useEffect(() => {
-    if (!!cart?.shipping_address?.metadata?.isVietQRPayment) {
+    if (!isPaymentSuccess && isVietQr && !isOpen && !isCreatingLink) {
       handlePayment()
     }
-  }, [cart])
+  }, [])
 
   return (
     <div className="bg-white">
@@ -201,30 +204,6 @@ const MyPayment = ({
                   </div>
                 </RadioGroup.Option>
               </RadioGroup>
-              {message ? (
-                <div className="text-green-500 border border-green-500 rounded-lg p-2 w-full">
-                  {message}
-                </div>
-              ) : null}
-              {
-                isPaymentSuccess && (<div className="text-blue-500 border border-blue-500 rounded-lg p-2 w-full">
-                  Sau khi hoàn tất thanh toán, xin vui lòng chờ 5-10 giây để hệ thống cập nhật đơn hàng.
-                </div>)
-              }
-              <div
-                id="embbed-checkout-form"
-                className={clx(
-                  (isOpen || isCreatingLink) && !isPaymentSuccess
-                    ? "h-[23em]"
-                    : ""
-                )}
-              >
-                {!isOpen && isCreatingLink ? (
-                  <div className="h-full flex items-center justify-center">
-                    <Spinner size={40} />
-                  </div>
-                ) : null}
-              </div>
             </>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
@@ -248,6 +227,30 @@ const MyPayment = ({
             error={error}
             data-testid="payment-method-error-message"
           />
+        </div>
+
+        {message ? (
+          <div className="text-green-600 border border-green-600 rounded-lg p-2 w-full">
+            {message}
+          </div>
+        ) : null}
+        {isPaymentSuccess && (
+          <div className="text-blue-700 border border-blue-700 rounded-lg p-2 w-full mt-2">
+            Sau khi hoàn tất thanh toán, xin vui lòng <b>chờ 5-10 giây</b> để hệ
+            thống cập nhật đơn hàng.
+          </div>
+        )}
+        <div
+          id="embbed-checkout-form"
+          className={clx(
+            (isOpen || isCreatingLink) && !isPaymentSuccess ? "h-[37em]" : ""
+          )}
+        >
+          {!isOpen && isCreatingLink ? (
+            <div className="h-full flex items-center justify-center">
+              <Spinner size={40} />
+            </div>
+          ) : null}
         </div>
 
         <div>

@@ -49,7 +49,7 @@ const MyShippingAddress = ({
       email: cart?.email || "",
       "shipping_address.phone": cart?.shipping_address?.phone || "",
     })
-  }, [cart?.shipping_address, cart?.email])
+  }, [cart?.shipping_address, cart?.email, setFormData])
 
   const handleChange = (
     e: React.ChangeEvent<

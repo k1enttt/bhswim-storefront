@@ -52,7 +52,7 @@ const Quantity = ({
     if (variant) {
       setQuantity(1)
     }
-  }, [variant])
+  }, [variant, setQuantity])
 
   return (
     <div className="w-24 h-10 border border-gray-200 rounded-md p-1 text-sm flex items-center justify-between">

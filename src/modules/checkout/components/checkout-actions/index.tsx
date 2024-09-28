@@ -23,10 +23,6 @@ const CheckoutActions = ({
   customer: Omit<Customer, "password_hash"> | null
   availableShippingMethods: PricedShippingOption[] | null
 }) => {
-  if (!cart) {
-    return null
-  }
-
   const params = useParams()
   const countryCode = params.countryCode as string
   const [isLoading, setIsLoading] = useState(false)
@@ -46,6 +42,17 @@ const CheckoutActions = ({
       cart?.shipping_address?.country_code || countryCode || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
   })
+
+  useEffect(() => {
+    setFormData(formData => ({
+      ...formData,
+      "shipping_address.metadata": cart?.shipping_address?.metadata || {},
+    }))
+  }, [cart])
+
+  if (!cart) {
+    return null
+  }
 
   const getAmount = (amount: number | null | undefined) => {
     return formatAmount({
@@ -88,13 +95,6 @@ const CheckoutActions = ({
   }
 
   const handleCheckout = () => {
-    // console.log("Trạng thái VietQR method")
-    // console.log(cart.shipping_address?.metadata?.isVietQRPayment)
-    // console.log("Trạng thái thanh toán")
-    // console.log(cart.shipping_address?.metadata?.isPaymentCompleted)
-    // console.log("Giỏ hàng")
-    // console.log(cart)
-
     // Check if VietQR payment is completed
     const isVietQRCheckoutCompleted =
       cart.shipping_address?.metadata?.isPaymentCompleted == true
@@ -109,11 +109,6 @@ const CheckoutActions = ({
       isCODPaymentCompleted || isVietQRCheckoutCompleted
     )
 
-    // console.log("Thanh toán VietQR: ", isVietQRCheckoutCompleted)
-    // console.log(
-    //   "Hoàn tất thanh toán: ",
-    //   cart.billing_address?.metadata?.isPaymentCompleted
-    // )
     if (!isPaymentCompleted) {
       console.log("Thanh toán chưa hoàn tất")
       return
@@ -136,12 +131,7 @@ const CheckoutActions = ({
     handlePayment(isCODPaymentCompleted, isVietQRCheckoutCompleted)
   }
 
-  useEffect(() => {
-    setFormData({
-      ...formData,
-      "shipping_address.metadata": cart.shipping_address?.metadata || {},
-    })
-  }, [cart])
+  
 
   return (
     <>
