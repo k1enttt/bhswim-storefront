@@ -13,6 +13,7 @@ import {
 } from "@modules/checkout/actions"
 import { clx } from "@medusajs/ui"
 import { PricedShippingOption } from "@medusajs/medusa/dist/types/pricing"
+import Alert from "../alert"
 
 const CheckoutActions = ({
   cart,
@@ -26,6 +27,7 @@ const CheckoutActions = ({
   const params = useParams()
   const countryCode = params.countryCode as string
   const [isLoading, setIsLoading] = useState(false)
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
@@ -44,7 +46,7 @@ const CheckoutActions = ({
   })
 
   useEffect(() => {
-    setFormData(formData => ({
+    setFormData((formData) => ({
       ...formData,
       "shipping_address.metadata": cart?.shipping_address?.metadata || {},
     }))
@@ -69,12 +71,12 @@ const CheckoutActions = ({
           !availableShippingMethods ||
           availableShippingMethods.length === 0
         ) {
-          console.log("Không tồn tại phương thức vận chuyển")
+          setCheckoutMessage("Không tồn tại phương thức vận chuyển")
           setIsLoading(false)
           return
         }
         if (!availableShippingMethods[0].id) {
-          console.log("Không tồn tại phương thức vận chuyển")
+          setCheckoutMessage("Không tồn tại phương thức vận chuyển")
           setIsLoading(false)
           return
         }
@@ -110,7 +112,7 @@ const CheckoutActions = ({
     )
 
     if (!isPaymentCompleted) {
-      console.log("Thanh toán chưa hoàn tất")
+      setCheckoutMessage("Thanh toán chưa hoàn tất")
       return
     }
 
@@ -123,15 +125,13 @@ const CheckoutActions = ({
     )
 
     if (!isShippingInfoFilled) {
-      console.log("Chưa điền thông tin giao hàng")
+      setCheckoutMessage("Vui lòng điền thông tin giao hàng")
       return
     }
 
     setIsLoading(true)
     handlePayment(isCODPaymentCompleted, isVietQRCheckoutCompleted)
   }
-
-  
 
   return (
     <>
@@ -162,6 +162,12 @@ const CheckoutActions = ({
           </div>
         </div>
       </div>
+      {checkoutMessage ? (
+        <Alert
+          message={checkoutMessage}
+          close={() => setCheckoutMessage(null)}
+        />
+      ) : null}
     </>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { Cart } from "@medusajs/medusa"
@@ -20,6 +20,9 @@ import Radio from "@modules/common/components/radio"
 import VietQRLogo from "@modules/common/components/vietqr-logo"
 import { PayOSConfig, usePayOS } from "payos-checkout"
 import { useParams } from "next/navigation"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faCircleCheck } from "@fortawesome/free-regular-svg-icons"
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons"
 
 const MyPayment = ({
   cart,
@@ -89,15 +92,14 @@ const MyPayment = ({
       setIsOpen(false)
       setIsPaymentSuccess(true)
       onCheckoutSuccess()
-      setMessage("Thanh toan thanh cong")
+      setMessage("Thanh toán thành công")
     },
     onExit: () => {
       setIsOpen(false)
-      console.log("Thanh toan bi huy")
     },
     onCancel: () => {
       setIsOpen(false)
-      setMessage("Thanh toan bi huy")
+      setMessage("Thanh toán bị hủy")
     },
   })
 
@@ -230,14 +232,23 @@ const MyPayment = ({
         </div>
 
         {message ? (
-          <div className="text-green-600 border border-green-600 rounded-lg p-2 w-full">
-            {message}
+          <div className="text-green-600 border border-green-600 bg-green-100 rounded-lg p-2 w-full space-x-1">
+            <FontAwesomeIcon icon={faCircleCheck} />
+            <span>{message}</span>
           </div>
         ) : null}
         {isPaymentSuccess && (
-          <div className="text-blue-700 border border-blue-700 rounded-lg p-2 w-full mt-2">
-            Sau khi hoàn tất thanh toán, xin vui lòng <b>chờ 5-10 giây</b> để hệ
-            thống cập nhật đơn hàng.
+          <div className="text-blue-700 border border-blue-700 bg-blue-100 rounded-lg p-2 w-full mt-2">
+            <div className="flex items-start gap-1">
+              <div>
+                <FontAwesomeIcon icon={faCircleInfo} />
+              </div>
+
+              <div>
+                Sau khi hoàn tất thanh toán, vui lòng <b>chờ 5-10 giây</b> để hệ
+                thống cập nhật đơn hàng.
+              </div>
+            </div>
           </div>
         )}
         <div
@@ -306,7 +317,7 @@ const MyPayment = ({
           ) : null}
         </div>
       </div>
-      <Divider className="mt-8" />
+      
     </div>
   )
 }
