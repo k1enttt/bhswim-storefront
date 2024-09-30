@@ -54,8 +54,13 @@ export default function MyProductActions({
   useEffect(() => {
     const optionObj: Record<string, string> = {}
 
+    /**
+     * product.options chứa bộ các options của sản phẩm. Mỗi option chứa nhiều giá trị.
+     * Ví dụ: Màu sắc: Đỏ, Xanh, Vàng. Kích cỡ: S, M, L
+     * Mỗi option sẽ có một giá trị mặc định, ở đây là giá trị đầu tiên của mỗi option.
+     */
     for (const option of product.options || []) {
-      Object.assign(optionObj, { [option.id]: undefined })
+      Object.assign(optionObj, { [option.id]: option.values[0].id })
     }
 
     setOptions(optionObj)

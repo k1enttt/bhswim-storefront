@@ -37,7 +37,8 @@ const Slider = ({ images }: { images?: MedusaImage[] }) => {
           <SwiperSlide key={index}>
             <div className="w-full aspect-[1/1] rounded-lg overflow-hidden">
               <Image
-                fill={true}
+                layout="fill"
+                objectFit="contain"
                 src={image.url}
                 alt={`Slide ${index}`}
                 className="absolute inset-0 object-cover object-center"
