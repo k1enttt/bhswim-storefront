@@ -102,7 +102,7 @@ const MyDiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                 className="flex items-center justify-between w-full max-w-full"
                 data-testid="discount-row"
               >
-                <Text className="flex gap-x-1 items-baseline txt-small-plus w-4/5 pr-1">
+                <Text className="flex gap-x-1 items-baseline txt-medium w-4/5 pr-1">
                   <span>Mã:</span>
                   <span className="truncate" data-testid="discount-code">
                     {discounts[0].code}
@@ -120,7 +120,9 @@ const MyDiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                   onClick={removeDiscountCode}
                   data-testid="remove-discount-button"
                 >
-                  <Trash size={14} />
+                  <div className="p-1 bg-gray-100 rounded-sm">
+                    <Trash size={14} />
+                  </div>
                   <span className="sr-only">Xóa mã giảm giá</span>
                 </button>
               </div>
