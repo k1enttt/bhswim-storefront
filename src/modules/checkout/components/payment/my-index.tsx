@@ -120,7 +120,7 @@ const MyPayment = ({
       : []
 
     const response = await createVietQRPaymentLink({
-      amount: 10000,
+      amount: cart?.total || 0,
       description: "Thanh toan don hang",
       items: items,
     })
