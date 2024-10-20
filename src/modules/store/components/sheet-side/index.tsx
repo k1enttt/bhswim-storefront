@@ -17,6 +17,12 @@ export function SheetSide({ close }: { close: () => void }) {
             <div>Đến: 1.000.000đ</div>
           </div>
           <div className="w-full">
+            <DualRangeSlider
+              min={0}
+              max={9000000}
+              step={10000}
+              minDistance={1000000}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div></div>
