@@ -8,6 +8,7 @@ import CartIcon from "@modules/common/components/cart-icon"
 import MyCartButton from "@modules/layout/components/cart-button/my-index"
 import Logo from "@modules/layout/components/logo"
 import Search from "@modules/layout/components/search"
+import User from "@modules/common/icons/user"
 
 export default async function MyNav() {
   const regions = await listRegions().then((regions) => regions)
@@ -32,14 +33,15 @@ export default async function MyNav() {
             </LocalizedClientLink>
           </div>
 
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
+          <div className="flex items-center h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
                 className="hover:text-ui-fg-base"
                 href="/account"
                 data-testid="nav-account-link"
               >
-                Account
+                <div className="px-2">
+                <User size={24} /></div>
               </LocalizedClientLink>
             </div>
             <div className="flex items-center gap-x-2">
