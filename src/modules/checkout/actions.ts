@@ -19,6 +19,8 @@ import { redirect } from "next/navigation"
 import { CheckoutRequestType } from "@payos/node/lib/type"
 import { payOS } from "@lib/config"
 
+const X_PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+
 export async function cartUpdate(data: StorePostCartsCartReq) {
   const cartId = cookies().get("_medusa_cart_id")?.value
 
@@ -331,8 +333,8 @@ export async function placeMyOrder(paymentId: string) {
 }
 
 export async function setPaymentCaptured(orderId: string) {
-  let LOCAL_BACKEND_URL = "http://localhost:9000"
-  let PUBLIC_BACKEND_URL = "https://bhswimbackend.kienttt.site"
+  const LOCAL_BACKEND_URL = "http://localhost:9000"
+  const PUBLIC_BACKEND_URL = "https://bhswimbackend.kienttt.site"
   try {
     await fetch(
       `${LOCAL_BACKEND_URL}/store/custom/order/${orderId}/capture/`,
@@ -357,7 +359,7 @@ export const createVietQRPaymentLink = async ({
   description: string
   items: { name: string; quantity: number; price: number }[]
 }) => {
-  const countryCode = cookies().get("country_code")?.value || "vn"
+  const countryCode = cookies().get("country_code")?.value || "us"
   const pathname = "https://bhswimstorefront.kienttt.site"
 
   const body: CheckoutRequestType = {

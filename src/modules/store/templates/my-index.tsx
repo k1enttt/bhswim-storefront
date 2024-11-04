@@ -2,6 +2,9 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import Filter from "../components/filter"
 import Sort from "../components/sort"
 import Image from "next/image"
+import { Suspense } from "react"
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
+import MyPaginatedProducts from "./my-paginated-products"
 
 const sampleProducts = [
   {
@@ -62,22 +65,33 @@ const MyStoreTemplate = ({
       </div>
       <div className="border-b border-b-gray-300"></div>
       {/* Product grid - 20 products per page */}
-      <div className="w-full grid grid-cols-2 gap-4">
-        {sampleProducts.map((product) => (
-          <div
-            key={product.handle}
-            className="w-full bg-orange-100 rounded-lg shadow-sm p-4 space-y-4"
-          >
-            <div className="relative w-full aspect-square flex items-center justify-center">
-              <Image fill={true} src={product.thumbnail} alt={product.title} />
+      <Suspense fallback={<SkeletonProductGrid />}>
+        <MyPaginatedProducts
+          sortBy={sortBy || "created_at"}
+          page={pageNumber}
+          countryCode={countryCode}
+        />
+        {/* <div className="w-full grid grid-cols-2 gap-4">
+          {sampleProducts.map((product) => (
+            <div
+              key={product.handle}
+              className="w-full bg-orange-100 rounded-lg shadow-sm p-4 space-y-4"
+            >
+              <div className="relative w-full aspect-square flex items-center justify-center">
+                <Image
+                  fill={true}
+                  src={product.thumbnail}
+                  alt={product.title}
+                />
+              </div>
+              <div>
+                <div className="title">{product.title}</div>
+                <div className="price">{product.priceVnd}</div>
+              </div>
             </div>
-            <div>
-              <div className="title">{product.title}</div>
-              <div className="price">{product.priceVnd}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div> */}
+      </Suspense>
 
       {/* Pagination */}
 

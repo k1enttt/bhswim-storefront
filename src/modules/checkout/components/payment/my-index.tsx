@@ -91,7 +91,7 @@ const MyPayment = ({
     onSuccess: () => {
       setIsOpen(false)
       setIsPaymentSuccess(true)
-      onCheckoutSuccess()
+      onCheckoutSuccess() // Lưu trạng thái thanh toán vào data của đơn hàng
       setMessage("Thanh toán thành công")
     },
     onExit: () => {
